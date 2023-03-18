@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 
-import { Chart, CategoryScale, LinearScale, PointElement, LineElement, LineController, Title, SubTitle, Legend, Tooltip, Filler} from "chart.js"
+import { Chart, CategoryScale, LinearScale, PointElement, LineElement, LineController, BarElement, BarController, Scale, Title, SubTitle, Legend, Tooltip, Filler} from "chart.js"
 
-Chart.register(CategoryScale, LinearScale, PointElement, LineController, LineElement, Title, SubTitle, Legend, Tooltip, Filler)
+Chart.register(CategoryScale, LinearScale, PointElement, LineController, LineElement, BarElement, BarController, Title, SubTitle, Legend, Tooltip, Filler)
 
 Chart.defaults.backgroundColor = "#fff" // points
 Chart.defaults.borderColor = "#434343" // grid

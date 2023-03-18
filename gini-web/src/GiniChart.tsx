@@ -1,3 +1,4 @@
+import { ChartData } from "chart.js"
 import { Line } from "react-chartjs-2"
 import { GiniResult } from "./Core"
 
@@ -5,6 +6,34 @@ const NORMAL = ["#FF638400", "#36A2EB00"]
 const HOVER = ["#FF63849F", "#36A2EB9F"]
 
 export default function GiniChart(props: { gini: GiniResult }) {
+
+    const datasets: ChartData<'line', { x: number, y: number }[]> = {
+        datasets: [
+            {
+                label: 'ideale Gleichverteilung',
+                data: props.gini.scales.normal,
+                borderColor: '#FF6384',
+                backgroundColor: '#FF63842F',
+                fill: 1,
+                parsing: {
+                    xAxisKey: 'x',
+                    yAxisKey: 'y'
+                }
+            },
+            {
+                label: 'Lorenzkurve',
+                data: props.gini.scales.lorenz,
+                borderColor: '#36A2EB',
+                backgroundColor: '#36A2EB2f',
+                fill: "origin",
+                parsing: {
+                    xAxisKey: 'x',
+                    yAxisKey: 'y'
+                }
+            },
+        ]
+    }
+
     return (
         <Line
             datasetIdKey='gini-chart'
@@ -32,6 +61,8 @@ export default function GiniChart(props: { gini: GiniResult }) {
                     x: {
                         position: "left",
                         axis: "x",
+                        max: 100,
+                        beginAtZero: true,
                         title: {
                             display: true,
                             align: "center",
@@ -44,6 +75,8 @@ export default function GiniChart(props: { gini: GiniResult }) {
                     y: {
                         position: "left",
                         axis: "y",
+                        max: 1,
+                        beginAtZero: true,
                         title: {
                             display: true,
                             align: "center",
@@ -65,24 +98,26 @@ export default function GiniChart(props: { gini: GiniResult }) {
                 }
             }}
             data={{
-                labels: props.gini.groupDist.map(e => e * 100),
-                datasets: [
-                    {
-                        label: 'ideale Gleichverteilung',
-                        data: props.gini.groupDist,
-                        borderColor: '#FF6384',
-                        backgroundColor: '#FF63842F',
-                        fill: 1,
-                    },
-                    {
-                        label: 'Lorenzkurve',
-                        data: props.gini.incomeDist,
-                        borderColor: '#36A2EB',
-                        backgroundColor: '#36A2EB2f',
-                        fill: "origin"
-                    },
-                ],
+                labels: props.gini.scales.normal.map(e => (e.x * 100)),
+                datasets: datasets.datasets
             }}
         />
     )
 }
+
+// [
+//     {
+//         label: 'ideale Gleichverteilung',
+//         data: props.gini.scales.normal,
+//         borderColor: '#FF6384',
+//         backgroundColor: '#FF63842F',
+//         fill: 1,
+//     },
+//     {
+//         label: 'Lorenzkurve',
+//         data: [{ x: 1, y: 3 }],
+//         borderColor: '#36A2EB',
+//         backgroundColor: '#36A2EB2f',
+//         fill: "origin"
+//     },
+// ],

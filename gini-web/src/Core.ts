@@ -1,68 +1,97 @@
 
+export type DataPoint = {
+    name: string
+    value: number
+}
+
+/**
+ * Auf zwei Nachkommastellen runden.
+ */
 export function round(x: number) {
     return Math.floor(x * 100) / 100
 }
 
-export function sum(data: number[]) {
-    return data.reduce((prev, curr) => prev+curr, 0)
+/**
+ * Addiert die Werte einer Liste.
+ */
+export function sum(data: number[], n?: number) {
+    return data.reduce((prev, curr) => prev + curr, 0) + (n ?? 0)
 }
 
+/**
+ * Addiert die Werte einer Liste mit einem aufsteigenden Faktor beginnend bei 1.
+ */
 export function sumWithIndexFactor(data: number[]) {
-    return data.map((e, i) => e * (i+1)).reduce((prev, curr) => prev+curr, 0)
+    return data.map((e, i) => e * (i + 1)).reduce((prev, curr) => prev + curr, 0)
 }
 
-export function getPartialSums(data: number[]) {
-    return data.map((_, i, d) => sum(d.slice(0, i+1)))
+/**
+ * Bildet die Summe aus einem Wert und seinen vorläufern.
+ */
+export function getPartialSums(data: number[], n?: number) {
+    return data.map((_, i, d) => sum(d.slice(0, i + 1), n))
 }
 
-export function getIncomeDistribution(partialSums: number[]) {
-    const total = partialSums.at(-1) as number
-    const result = [0]
+/**
+ * Erzeugt eine Lorenzkurve.
+ */
+export function lorenzCurve(data: DataPoint[]) {
 
-    for(let i = 0; i < partialSums.length; i++) {
-        result.push(round((partialSums[i])/total))
+    const partialSums = getPartialSums(data.map(e => e.value))
+    const total = Math.max(...partialSums)
+
+    const origin = { x: 0, y: 0 }
+    const result = [origin]
+
+    for (let i = 0; i < data.length; i++) {
+        result.push({ x: round((1 / data.length) * (i + 1)), y: round(partialSums[i] / total) })
     }
 
     return result
 }
 
-export function getGroupDistribution(data: number[]) {
-    const result = [0]
-
-    for(let i = 0; i < data.length; i++) {
-        result.push(round((i+1)/data.length))
-    }
-
-    return result
+/**
+ * Ideale Verteilungskurve
+ */
+export function normal(data: DataPoint[]) {
+    return Array.from({ length: data.length + 1 }, (_, i) => { return { x: round((1 / data.length) * i), y: round((1 / data.length) * i) } })
 }
 
 export type GiniResult = {
-    input: number[]
-    partialSums: number[]
+    input: DataPoint[]
     total: number
     gini: number
-    incomeDist: number[]
-    groupDist: number[]
+    scales: {
+        lorenz: { x: number, y: number }[]
+        normal: { x: number, y: number }[]
+    }
 }
 
-export default function CalculateGini(data: number[]) {
-    const numerator = 2 * sumWithIndexFactor(data)
-    const denominator = data.length * sum(data)
+export default function CalculateGini(data: DataPoint[]) {
+    const sortedData = data.sort((a, b) => a.value - b.value) // sort by value (ascending)
+
+    const values = sortedData.map(e => e.value)
+    const n = sortedData.length
+
+    const numerator = 2 * sumWithIndexFactor(values)
+    const denominator = n * sum(values)
 
     const first = numerator / denominator
-    const second = (data.length + 1) / data.length
+    const second = (n + 1) / n
 
     const g = round((first - second) * 100)
-    const partialSums = getPartialSums(data)
 
     const result: GiniResult = {
         input: data,
-        partialSums,
-        total: partialSums.at(-1) as number,
+        total: Math.max(...getPartialSums(values)),
         gini: g,
-        incomeDist: getIncomeDistribution(partialSums),
-        groupDist: getGroupDistribution(data),
+        scales: {
+            lorenz: lorenzCurve(sortedData),
+            normal: normal(sortedData),
+        }
     }
+
+    console.log(result)
 
     return result
 }
