@@ -17,11 +17,23 @@ export function getPartialSums(data: number[]) {
 
 export function getIncomeDistribution(partialSums: number[]) {
     const total = partialSums.at(-1) as number
-    return partialSums.map(e => round(e/total))
+    const result = [0]
+
+    for(let i = 0; i < partialSums.length; i++) {
+        result.push(round((partialSums[i])/total))
+    }
+
+    return result
 }
 
 export function getGroupDistribution(data: number[]) {
-    return data.map((_, i) => round((i+1)/data.length))
+    const result = [0]
+
+    for(let i = 0; i < data.length; i++) {
+        result.push(round((i+1)/data.length))
+    }
+
+    return result
 }
 
 export type GiniResult = {
